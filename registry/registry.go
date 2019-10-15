@@ -3,6 +3,7 @@ package registry
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -152,6 +153,37 @@ func (r *Registry) FetchAll() (im map[string][]*model.Instance) {
 	for _, as := range ass {
 		for _, a := range as.App("") {
 			im[a.AppID] = append(im[a.AppID], a.Instances()...)
+		}
+	}
+	return
+}
+
+// FetchApps fetch app instances of
+func (r *Registry) FetchApp(appname string) (im *model.Instance,err error) {
+		ass := r.allapp()
+		for _, as := range ass {
+			for _, a := range as.App("") {
+				apps := strings.Split(a.AppID, "@")
+				if apps[0] == appname {
+					im = a.Instances()[0]
+				}
+			}
+		}
+		return
+}
+
+// FetchApps fetch app instances of
+func (r *Registry) FetchApps(appname string) (im map[string][]*model.Instance, err error) {
+	ass := r.allapp()
+	im = make(map[string][]*model.Instance)
+	for _, as := range ass {
+		for _, a := range as.App("") {
+			apps := strings.Split(a.AppID, "@")
+			if apps[0] == appname {
+				instance := make([]*model.Instance, 0)
+				instance = append(instance, a.Instances()...)
+				im[a.AppID] = instance
+			}
 		}
 	}
 	return
